@@ -1,3 +1,5 @@
+from uuid import UUID
+
 from pydantic import BaseModel
 
 
@@ -16,7 +18,7 @@ class UserRegister(BaseModel):
     role:str
 
 class UserPublic(BaseModel):
-    id:str
+    id:UUID
     firstName:str
     lastName:str
     church:str
