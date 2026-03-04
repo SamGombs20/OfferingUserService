@@ -1,4 +1,4 @@
-from uuid import UUID
+from uuid import UUID, uuid4
 
 from sqlmodel import SQLModel, Field
 from pydantic import EmailStr
@@ -17,7 +17,8 @@ class UserBase(SQLModel):
 
 class User(UserBase, table=True):
     __tablename__ = "analysis_users"
-    id:UUID = Field(default=None, primary_key=True)
+    id:UUID = Field(default_factory=uuid4, 
+                    primary_key=True)
     hashed_password:str
 
 class UserLogIn(SQLModel):
