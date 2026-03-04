@@ -26,7 +26,7 @@ async def register(user_in:UserRegister, session:AsyncSession = Depends(get_sess
     )
     session.add(new_user)
     await session.commit()
-    return new_user
+    return UserPublic.model_validate(new_user)
 
     
     
