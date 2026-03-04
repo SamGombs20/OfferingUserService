@@ -1,4 +1,5 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, HTTPException
+from fastapi.params import Depends
 from sqlmodel.ext.asyncio.session import AsyncSession
 from sqlmodel import select
 from utils.utils import hash_password
@@ -23,7 +24,8 @@ async def register(user_in:UserRegister, session:AsyncSession = Depends(get_sess
         username=user_in.username,
         hashed_password=hashed_pass
     )
-    await session.commit(new_user)
+    session.add(new_user)
+    await session.commit()
     return new_user
 
     

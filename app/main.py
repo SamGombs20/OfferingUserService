@@ -1,8 +1,11 @@
 from fastapi import FastAPI
 
+from routers import auth
 from db.database import init_db
 
+
 app = FastAPI()
+app.include_router(auth.router)
 @app.on_event("startup")
 async def start_up():
     await init_db()

@@ -1,3 +1,4 @@
+from datetime import datetime
 from uuid import UUID, uuid4
 
 from sqlmodel import SQLModel, Field
@@ -10,7 +11,7 @@ class UserBase(SQLModel):
     phone_number:str = Field(..., alias="phoneNumber")
     email:EmailStr
     username:str
-    
+    role:str = "user"
     class Config:
         populate_by_name = True
         from_attributes = True
@@ -20,6 +21,7 @@ class User(UserBase, table=True):
     id:UUID = Field(default_factory=uuid4, 
                     primary_key=True)
     hashed_password:str
+    created_at:datetime = Field(default_factory=datetime.utcnow)
 
 class UserLogIn(SQLModel):
     username:str
