@@ -47,6 +47,8 @@ async def login(user_in:OAuth2PasswordRequestForm= Depends(), session:AsyncSessi
     access_token = create_access_token(user_in.username)
     refresh_token = create_refresh_token(user_in.username)
     
+    token = Token(access_token, refresh_token, "bearer")
     
+    return token
     
     
