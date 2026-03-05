@@ -1,9 +1,9 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, status
 from fastapi.params import Depends
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlmodel.ext.asyncio.session import AsyncSession
 from sqlmodel import select
-from utils.utils import hash_password
+from utils.utils import create_access_token, create_refresh_token, hash_password, verify_password
 from db.database import get_session
 from models.user import User, UserLogIn, UserPublic, UserRegister
 from models.token import Token
@@ -32,8 +32,21 @@ async def register(user_in:UserRegister, session:AsyncSession = Depends(get_sess
     public_user = UserPublic.model_validate(new_user)
     return public_user
 
-@router.post("/login")
-async def login(user_in:OAuth2PasswordRequestForm= Depends(), session:AsyncSession = Depends(get_session))->Token:
-    username = user_in.user
+@router.post("/login", response_model=Token)
+async def login(user_in:OAuth2PasswordRequestForm= Depends(), session:AsyncSession = Depends(get_session)):
+    username = user_in.username
+    password = user_in.password
+    
+    results = await session.execute(select(User).where(User.username ==username))
+    user:User = results.scalars().first()
+    if not user or not verify_password(password, user.hashed_password):
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                            detail="Incorrect username or password",
+                            headers={"WWW-Authenticate":"Bearer"})
+    
+    access_token = create_access_token(user_in.username)
+    refresh_token = create_refresh_token(user_in.username)
+    
+    
     
     

@@ -41,6 +41,8 @@ def create_refresh_token(username:str)->str:
         "iat":datetime.utcnow(),
         "token_type":"refresh"
     }
+    token = jwt.encode(to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
+    return token
 def decode_token(token:str)->Optional[Dict[str, any]]:
     try:
         payload = jwt.decode(token, settings.SECRET_KEY, algorithms=settings.ALGORITHM)
