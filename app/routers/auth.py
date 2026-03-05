@@ -1,9 +1,9 @@
 from fastapi import APIRouter, HTTPException, status
-from fastapi.params import Depends
+from fastapi.params import Body, Depends
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlmodel.ext.asyncio.session import AsyncSession
 from sqlmodel import select
-from utils.utils import create_access_token, create_refresh_token, hash_password, verify_password
+from utils.utils import create_access_token, create_refresh_token, decode_token, hash_password, verify_password
 from db.database import get_session
 from models.user import User, UserLogIn, UserPublic, UserRegister
 from models.token import Token
@@ -53,4 +53,31 @@ async def login(user_in:OAuth2PasswordRequestForm= Depends(), session:AsyncSessi
         "token_type": "bearer"
     }
     
+@router.post("/refresh", response_model=Token)
+async def refresh_token(token:str = Body(...)):
+    payload = decode_token(token)
+    
+    if not payload or payload["token_type"]!="refresh":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Invalid refresh token",
+            headers={"WWW-Authenticate":"Bearer"}
+        )
+    
+    username = payload.get("sub")
+    if not username:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found",
+            headers={"WWW-Authenticate":"Bearer"}
+        )
+    
+    access_token = create_access_token(username)
+    new_refresh_token = create_refresh_token(username)
+    
+    return {
+        "access_token": access_token,
+        "refresh_token": new_refresh_token,
+        "token_type": "bearer"
+    }
     
