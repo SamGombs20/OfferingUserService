@@ -4,7 +4,7 @@ from sqlmodel.ext.asyncio.session import AsyncSession
 from sqlmodel import select
 from utils.utils import hash_password
 from db.database import get_session
-from models.user import User, UserPublic, UserRegister
+from models.user import User, UserLogIn, UserPublic, UserRegister
 router = APIRouter(prefix="/auth", tags=["auth"])
 
 @router.post("/register", response_model=UserPublic)
@@ -26,7 +26,13 @@ async def register(user_in:UserRegister, session:AsyncSession = Depends(get_sess
     )
     session.add(new_user)
     await session.commit()
-    return UserPublic.model_validate(new_user)
+    await session.refresh(new_user)
+    public_user = UserPublic.model_validate(new_user)
+    return public_user
+
+@router.post("/login")
+async def login(user_in:UserLogIn, session:AsyncSession = Depends(get_session)):
+    
 
     
     
