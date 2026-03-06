@@ -24,6 +24,7 @@ async def register(user_in:UserRegister, session:AsyncSession = Depends(get_sess
         phoneNumber=user_in.phone_number,
         email=user_in.email,
         username=user_in.username,
+        role="user",
         hashed_password=hashed_pass
     )
     session.add(new_user)

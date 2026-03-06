@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import Optional
 from uuid import UUID, uuid4
 
 from sqlmodel import SQLModel, Field
@@ -11,7 +12,7 @@ class UserBase(SQLModel):
     phone_number:str = Field(..., alias="phoneNumber")
     email:EmailStr
     username:str
-    role:str = "user"
+    role:Optional[str] = "user"
     class Config:
         populate_by_name = True
         from_attributes = True
