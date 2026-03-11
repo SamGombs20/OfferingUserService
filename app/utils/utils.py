@@ -52,6 +52,7 @@ def decode_token(token:str)->Optional[Dict[str, any]]:
     
 def get_current_user(token:str=Depends(oauth2_scheme))->str:
     try:
+        print(token)
         payload = decode_token(token)
         token_data = TokenPayload(**payload)
         if datetime.fromtimestamp(token_data.exp) <datetime.utcnow():
