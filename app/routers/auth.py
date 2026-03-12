@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, HTTPException, Request, Response, status
 from fastapi.params import Body, Depends
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlmodel.ext.asyncio.session import AsyncSession
@@ -55,7 +55,15 @@ async def login(user_in:OAuth2PasswordRequestForm= Depends(), session:AsyncSessi
     }
     
 @router.post("/refresh", response_model=Token)
-async def refresh_token(token:str = Body(...)):
+async def refresh_token(request:Request, response:Response):
+    token = request.cookies.get('refresh_token')
+    if not refresh_token:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Unauthorized",
+            headers={'WWW-Authenticate':'Bearer'}
+        )
+    
     payload = decode_token(token)
     
     if not payload or payload["token_type"]!="refresh":
@@ -75,7 +83,24 @@ async def refresh_token(token:str = Body(...)):
     
     access_token = create_access_token(username)
     new_refresh_token = create_refresh_token(username)
-    
+    response.set_cookie(
+        key='refresh_token',
+        value=new_refresh_token,
+        httponly=True,
+        secure=True,
+        samesite="strict",
+        path="/",
+        max_age=2 * 24 *3600
+    )
+    response.set_cookie(
+        key="session_token",
+        value=access_token,
+        httponly=True,
+        secure=True,
+        samesite="strict",
+        path='/',
+        max_age=15 * 60
+    )
     return {
         "access_token": access_token,
         "refresh_token": new_refresh_token,
