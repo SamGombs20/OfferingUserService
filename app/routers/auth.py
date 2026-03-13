@@ -1,6 +1,7 @@
 from fastapi import APIRouter, HTTPException, Request, Response, status
 from fastapi.params import Body, Depends
 from fastapi.security import OAuth2PasswordRequestForm
+from sqlalchemy import or_
 from sqlmodel.ext.asyncio.session import AsyncSession
 from sqlmodel import select
 from utils.utils import create_access_token, create_refresh_token, decode_token, hash_password, verify_password
@@ -11,7 +12,12 @@ router = APIRouter(prefix="/auth", tags=["auth"])
 
 @router.post("/register", response_model=UserPublic)
 async def register(user_in:UserRegister, session:AsyncSession = Depends(get_session)):
-    result = await session.execute(select(User).where(User.username == user_in.username))
+    result = await session.execute(select(User).where(
+        or_(
+            User.username ==user_in.username,
+            User.email ==user_in.email
+        )
+    ))
     
     if result.scalars().first():
         raise HTTPException(status_code=400, detail="Username already exists")
