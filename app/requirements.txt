@@ -1,10 +1,9 @@
 #Core
-fastapi>=0.123.0
-uvicorn[standard]>=0.22.0
-pydantic>=2.7.0
-pydantic-settings>=2.3.0
+fastapi>=0.135.1
+uvicorn[standard]>=0.42.0
+pydantic[email]>=2.12.5
+pydantic-settings>=2.9.0
 python-multipart>=0.0.6
-email-validator >= 2.0.0
 #Database
 sqlmodel>=0.0.22
 asyncpg>=0.27.0
